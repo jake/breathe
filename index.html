@@ -5,6 +5,7 @@
     </head>
     <body>
         <script src="js/three.min.js"></script>
+        <script src="js/three/OrbitControls.js"></script>
         <script>
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -13,8 +14,10 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+
             var geometry = new THREE.CubeGeometry(1,1,5);
-            var material = new THREE.MeshNormalMaterial({
+            var material = new THREE.MeshLambertMaterial({
                 color: 0x00ff00,
                 // wireframe: true,
             });
@@ -22,7 +25,7 @@
             scene.add(cube);
 
             var light = new THREE.PointLight(0xFFFF00);
-            light.position.set(10, 0, 10);
+            light.position.set(10, 50, 130);
             scene.add(light);
 
             camera.position.set(-15, 10, 10);
@@ -35,6 +38,7 @@
                 cube.rotation.y += 0.025;
 
                 renderer.render(scene, camera);
+                controls.update();
             };
 
             render();
