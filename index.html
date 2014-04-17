@@ -7,29 +7,101 @@
         <script src="/js/lib/jquery.min.js"></script>
         <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
-        <script src="/js/lib/three.OrbitControls.js"></script>
         <script>
-            var SCREEN_WIDTH = window.innerWidth;
-            var SCREEN_HEIGHT = window.innerHeight;
+            var Workspace = function(){
+                this.SCREEN_WIDTH = 600;
+                this.SCREEN_HEIGHT = 400;
 
-            var scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000000, 0.000275);
+                this.renderer = false;
+                this.camera = false;
+                this.scene = false;
 
-            var camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 10000);
-            camera.position.set(-1000, 500, -1000);
-            camera.lookAt(scene.position);
+                this.lights = {
+                    directional: [],
+                };
 
-            scene.add(new THREE.AmbientLight(0xffffff));
+                this.init_renderer();
+                this.init_camera();
+                this.init_scene();
+                this.init_lights();
 
-            var directional = new THREE.DirectionalLight(0xFF8D67, 0.75);
-            directional.position.set(-200, 400, -200);
-            scene.add(directional);
+                this.render_debug_helpers();
 
-            var renderer = new THREE.WebGLRenderer();
-            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-            document.body.appendChild(renderer.domElement);
+                this.update_camera();
+                this.render();
+            };
 
-            // var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            Workspace.prototype.init_camera = function(){
+                this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 0.1, 10000);
+                this.camera.position.set(-1000, 500, -1000);
+            };
+
+            Workspace.prototype.init_renderer = function(){
+                this.renderer = new THREE.WebGLRenderer();
+                this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+                $("body").append(this.renderer.domElement);
+            };
+
+            Workspace.prototype.init_scene = function(){
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.FogExp2(0x000000, 0.000275);
+            };
+
+            Workspace.prototype.init_lights = function(){
+                this.scene.add(new THREE.AmbientLight(0xffffff));
+
+                var directional = new THREE.DirectionalLight(0xFF8D67, 0.75);
+                directional.position.set(-200, 400, -200);
+                this.scene.add(directional);
+                this.lights.directional.push(directional);
+            };
+
+            Workspace.prototype.update_camera = function(){
+                this.SCREEN_WIDTH = window.innerWidth;
+                this.SCREEN_HEIGHT = window.innerHeight;
+
+                this.camera.aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
+                this.camera.updateProjectionMatrix();
+
+                this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+            };
+
+            Workspace.prototype.render_debug_helpers = function(){
+                this.scene.add(new THREE.AxisHelper(10000));
+                this.scene.add(new THREE.GridHelper(10000, 100));
+
+                _.each(this.lights.directional, function(light){
+                    this.scene.add(new THREE.DirectionalLightHelper(light, 100));
+                }, this);
+            };
+
+            Workspace.prototype.spin_camera = function(){
+                this._spin_camera_theta = this._spin_camera_theta || 0;
+
+                this.camera.position.x = -1000 * Math.sin(this._spin_camera_theta * Math.PI / 360);
+                this.camera.position.z = -1000 * Math.cos(this._spin_camera_theta * Math.PI / 360);
+                this.camera.lookAt(this.scene.position);
+                this._spin_camera_theta += 0.25;
+            };
+
+            Workspace.prototype.render = function(){
+                requestAnimationFrame(function(){ this.render() }.bind(this));
+
+                this.spin_camera();
+
+                // ball.rotation.y += 0.005;
+                // plane.rotation.y += 0.0005;
+
+                this.renderer.render(this.scene, this.camera);
+            };
+
+            // ==================================================
+
+            var workspace = new Workspace();
+
+            $(window).resize(function(){
+                workspace.update_camera();
+            });
 
             var material = new THREE.MeshLambertMaterial({
                 shading: THREE.FlatShading,
@@ -43,42 +115,11 @@
             var plane = new THREE.Mesh(new THREE.BoxGeometry(500, 10, 500), material);
             plane.rotation.y = -90 * Math.PI/180;
             plane.position.y = 5;
-            scene.add(plane);
+            workspace.scene.add(plane);
 
             var ball = new THREE.Mesh(new THREE.SphereGeometry(100, 20, 10), material);
             ball.position.y = 100 + 5;
-            scene.add(ball);
-
-            scene.add(new THREE.DirectionalLightHelper(directional, 100));
-            scene.add(new THREE.AxisHelper(10000));
-            scene.add(new THREE.GridHelper(10000, 100));
-
-            var theta = 0;
-            var render = function(){
-                requestAnimationFrame(render);
-
-                // ball.rotation.y += 0.005;
-                // plane.rotation.y += 0.0005;
-
-                camera.position.x = -1000 * Math.sin(theta * Math.PI / 360);
-                camera.position.z = -1000 * Math.cos(theta * Math.PI / 360);
-                camera.lookAt(scene.position);
-                theta += 0.25;
-
-                renderer.render(scene, camera);
-                // controls.update();
-            };
-
-            render();
-
-            $(window).resize(function(){
-                SCREEN_WIDTH = window.innerWidth;
-                SCREEN_HEIGHT = window.innerHeight;
-
-                camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-                camera.updateProjectionMatrix();
-                renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-            });
+            workspace.scene.add(ball);
         </script>
     </body>
 </html>
