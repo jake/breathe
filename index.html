@@ -20,17 +20,28 @@
             scene.add(new THREE.AmbientLight(0xffffff));
 
             var directional = new THREE.DirectionalLight(0xFF8D67, 0.75);
-            directional.position.set(0, 1, -1);
+            directional.castShadow = true;
+            directional.position.set(-1000, 2000, -1000);
+            directional.shadowCameraVisible = true;
             scene.add(directional);
 
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            renderer.shadowMapEnabled = true;
+            renderer.shadowMapSoft = true;
+            renderer.shadowCameraNear = 3;
+            renderer.shadowCameraFar = camera.far;
+            renderer.shadowCameraFov = 50;
+            renderer.shadowMapBias = 0.0039;
+            renderer.shadowMapDarkness = 0.5;
+            renderer.shadowMapWidth = 1024;
+            renderer.shadowMapHeight = 1024;
             document.body.appendChild(renderer.domElement);
 
             var controls = new THREE.OrbitControls(camera, renderer.domElement);
 
             var material = new THREE.MeshLambertMaterial({
-                shading: THREE.FlatShading,
+                // shading: THREE.FlatShading,
                 color: 0xff0000,
                 // wireframe: true,
             });
@@ -38,17 +49,19 @@
             var ka = 0.4;
             material.ambient.setRGB( material.color.r * ka, material.color.g * ka, material.color.b * ka );
 
-            var ground = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.FrontSide});
-
             var plane = new THREE.Mesh(new THREE.BoxGeometry(500, 10, 500), material);
+            plane.receiveShadow = true;
             plane.rotation.y = -90 * Math.PI/180;
             plane.position.y = 5;
             scene.add(plane);
 
             var ball = new THREE.Mesh(new THREE.SphereGeometry(100, 20, 10), material);
-            ball.position.y = 100;
-            plane.add(ball);
+            ball.receiveShadow = true;
+            ball.castShadow = true;
+            ball.position.y = 100 + 5;
+            scene.add(ball);
 
+            scene.add(new THREE.DirectionalLightHelper(directional, 1000));
             scene.add(new THREE.AxisHelper(10000));
             scene.add(new THREE.GridHelper(10000, 100));
 
