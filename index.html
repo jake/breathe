@@ -5,7 +5,7 @@
     </head>
     <body>
         <script src="/js/lib/jquery.min.js"></script>
-        <script src="/js/lib/underscore.js"></script>
+        <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
         <script src="/js/lib/three.OrbitControls.js"></script>
         <script>
@@ -61,7 +61,6 @@
                 // plane.rotation.y += 0.0005;
 
                 camera.position.x = -1000 * Math.sin(theta * Math.PI / 360);
-                camera.position.y = 500;
                 camera.position.z = -1000 * Math.cos(theta * Math.PI / 360);
                 camera.lookAt(scene.position);
                 theta += 0.25;
@@ -71,6 +70,15 @@
             };
 
             render();
+
+            $(window).resize(function(){
+                SCREEN_WIDTH = window.innerWidth;
+                SCREEN_HEIGHT = window.innerHeight;
+
+                camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+                camera.updateProjectionMatrix();
+                renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            });
         </script>
     </body>
 </html>
