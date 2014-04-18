@@ -1,12 +1,15 @@
 <html>
     <head>
         <title>just breathe</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimal-ui">
         <link href="/stylesheets/app.css" rel="stylesheet" type="text/css" />
     </head>
     <body>
         <script src="/js/lib/jquery.min.js"></script>
         <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
+        <script src="/js/lib/three.Detector.js"></script>
         <!--script src="/js/lib/three.OrbitControls.js"></script-->
         <script>
             function log() {
@@ -43,7 +46,7 @@
             };
 
             Workspace.prototype.init_renderer = function(){
-                this.renderer = new THREE.WebGLRenderer();
+                this.renderer = Detector.webgl ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer();
                 this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
                 $("body").append(this.renderer.domElement);
             };
@@ -116,6 +119,10 @@
                 color: 0x3b2f4a,
                 // wireframe: true,
             });
+
+            if (! Detector.webgl) {
+                material.overdraw = true;
+            }
 
             var ka = 0.4;
             material.ambient.setRGB( material.color.r * ka, material.color.g * ka, material.color.b * ka );
