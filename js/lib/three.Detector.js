@@ -52,6 +52,10 @@ var Detector = {
 		element = Detector.getWebGLErrorMessage();
 		element.id = id;
 
+		if (parameters.message) {
+			element.innerHTML = parameters.message;
+		}
+
 		parent.appendChild( element );
 
 	}
