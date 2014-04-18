@@ -11,6 +11,7 @@
         <script src="/js/lib/three.min.js"></script>
         <script src="/js/lib/three.Detector.js"></script>
         <!--script src="/js/lib/three.OrbitControls.js"></script-->
+        <script src="/js/lib/stats.min.js"></script>
         <script>
             function log() {
                 if (window.console && window.console.log) window.console.log.apply(window.console, arguments);
@@ -28,6 +29,11 @@
                 this.camera = false;
                 this.scene = false;
                 this.controls = false;
+
+                this.stats = {
+                    fps: false,
+                    ms: false,
+                };
 
                 this.lights = {
                     directional: [],
@@ -71,6 +77,21 @@
                 this.lights.directional.push(directional);
             };
 
+            Workspace.prototype.init_stats = function(){
+                this.stats.ms = new Stats();
+                this.stats.ms.setMode(1);
+                this.stats.ms.domElement.style.position = 'absolute';
+                this.stats.ms.domElement.style.bottom = '0px';
+                this.stats.ms.domElement.style.left = '0px';
+                $("body").append(this.stats.ms.domElement);
+
+                this.stats.fps = new Stats();
+                this.stats.fps.domElement.style.position = 'absolute';
+                this.stats.fps.domElement.style.bottom = '0px';
+                this.stats.fps.domElement.style.left = '80px';
+                $("body").append(this.stats.fps.domElement);
+            };
+
             Workspace.prototype.update_camera = function(){
                 this.SCREEN_WIDTH = window.innerWidth;
                 this.SCREEN_HEIGHT = window.innerHeight;
@@ -82,6 +103,8 @@
             };
 
             Workspace.prototype.render_debug_helpers = function(){
+                this.init_stats();
+
                 this.scene.add(new THREE.AxisHelper(10000));
                 this.scene.add(new THREE.GridHelper(10000, 100));
 
@@ -101,7 +124,13 @@
             };
 
             Workspace.prototype.render = function(){
-                requestAnimationFrame(function(){ this.render() }.bind(this));
+                requestAnimationFrame(function(){
+                    this.render();
+
+                    _.each(this.stats, function(stat){
+                        stat.update();
+                    });
+                }.bind(this));
 
                 this.spin_camera();
 
