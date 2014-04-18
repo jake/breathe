@@ -10,7 +10,7 @@
         <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
         <script src="/js/lib/three.Detector.js"></script>
-        <!--script src="/js/lib/three.OrbitControls.js"></script-->
+        <script src="/js/lib/three.OrbitControls.js"></script>
         <script src="/js/lib/stats.min.js"></script>
         <script>
             function log() {
@@ -49,7 +49,7 @@
 
             Workspace.prototype.init_camera = function(){
                 this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 0.1, 10000);
-                this.camera.position.set(-500, 250, -500);
+                this.camera.position.set(0, 700, -1500);
             };
 
             Workspace.prototype.init_renderer = function(){
@@ -61,8 +61,6 @@
             Workspace.prototype.init_scene = function(){
                 this.scene = new THREE.Scene();
                 this.scene.fog = new THREE.FogExp2(0x000000, 0.000275);
-
-                // this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             };
 
             Workspace.prototype.init_lights = function(){
@@ -93,6 +91,8 @@
             };
 
             Workspace.prototype.render_debug_helpers = function(){
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+
                 this.init_stats();
 
                 this.scene.add(new THREE.AxisHelper(10000));
@@ -119,10 +119,13 @@
                     if (this.stats) this.stats.update();
                 }.bind(this));
 
-                this.spin_camera();
+                if (this.controls) {
+                    this.controls.update();
+                } else {
+                    this.spin_camera();
+                }
 
                 this.renderer.render(this.scene, this.camera);
-                if (this.controls) this.controls.update();
             };
 
             // ==================================================
