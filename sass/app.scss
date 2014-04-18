@@ -1,7 +1,8 @@
 @import "compass";
 @import "compass/reset";
 
-canvas {
+html, body, canvas {
+    background: #000;
     width: 100%;
     height: 100%;
 }
