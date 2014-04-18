@@ -7,6 +7,7 @@
         <script src="/js/lib/jquery.min.js"></script>
         <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
+        <script src="/js/lib/three.OrbitControls.js"></script>
         <script>
             var Workspace = function(){
                 this.SCREEN_WIDTH = 600;
@@ -15,6 +16,7 @@
                 this.renderer = false;
                 this.camera = false;
                 this.scene = false;
+                this.controls = false;
 
                 this.lights = {
                     directional: [],
@@ -33,7 +35,7 @@
 
             Workspace.prototype.init_camera = function(){
                 this.camera = new THREE.PerspectiveCamera(45, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 0.1, 10000);
-                this.camera.position.set(-1000, 500, -1000);
+                this.camera.position.set(-500, 250, -500);
             };
 
             Workspace.prototype.init_renderer = function(){
@@ -45,6 +47,8 @@
             Workspace.prototype.init_scene = function(){
                 this.scene = new THREE.Scene();
                 this.scene.fog = new THREE.FogExp2(0x000000, 0.000275);
+
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             };
 
             Workspace.prototype.init_lights = function(){
@@ -87,12 +91,13 @@
             Workspace.prototype.render = function(){
                 requestAnimationFrame(function(){ this.render() }.bind(this));
 
-                this.spin_camera();
+                // this.spin_camera();
 
                 // ball.rotation.y += 0.005;
                 // plane.rotation.y += 0.0005;
 
                 this.renderer.render(this.scene, this.camera);
+                if (this.controls) this.controls.update();
             };
 
             // ==================================================
@@ -104,6 +109,7 @@
             });
 
             var material = new THREE.MeshLambertMaterial({
+                // side: THREE.FrontSide,
                 shading: THREE.FlatShading,
                 color: 0xff0000,
                 // wireframe: true,
@@ -112,14 +118,33 @@
             var ka = 0.4;
             material.ambient.setRGB( material.color.r * ka, material.color.g * ka, material.color.b * ka );
 
-            var plane = new THREE.Mesh(new THREE.BoxGeometry(500, 10, 500), material);
-            plane.rotation.y = -90 * Math.PI/180;
-            plane.position.y = 5;
-            workspace.scene.add(plane);
+            var terrain = new THREE.Geometry();
 
-            var ball = new THREE.Mesh(new THREE.SphereGeometry(100, 20, 10), material);
-            ball.position.y = 100 + 5;
-            workspace.scene.add(ball);
+            terrain.vertices.push(new THREE.Vector3(0, 0, 0));
+            terrain.vertices.push(new THREE.Vector3(0, 0, 100));
+            terrain.vertices.push(new THREE.Vector3(100, 25, 100));
+            terrain.vertices.push(new THREE.Vector3(100, 0, 0));
+
+            terrain.vertices.push(new THREE.Vector3(0, 0, 100));
+            terrain.vertices.push(new THREE.Vector3(0, 0, 200));
+            terrain.vertices.push(new THREE.Vector3(200, 0, 0));
+
+            var face;
+
+            face = new THREE.Face3(0,1,2);
+            face.normal = new THREE.Vector3(0,0,-1);
+            terrain.faces.push(face);
+
+            face = new THREE.Face3(0,2,3);
+            terrain.faces.push(face);
+
+            face = new THREE.Face3(4,5,2);
+            // face.normal = new THREE.Vector3(0,0,-1);
+            terrain.faces.push(face);
+
+            terrain.computeBoundingSphere();
+
+            workspace.scene.add(new THREE.Mesh(terrain, material));
         </script>
     </body>
 </html>
