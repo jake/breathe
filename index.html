@@ -7,8 +7,12 @@
         <script src="/js/lib/jquery.min.js"></script>
         <script src="/js/lib/underscore.min.js"></script>
         <script src="/js/lib/three.min.js"></script>
-        <script src="/js/lib/three.OrbitControls.js"></script>
+        <!--script src="/js/lib/three.OrbitControls.js"></script-->
         <script>
+            function log() {
+                if (window.console && window.console.log) window.console.log.apply(window.console, arguments);
+            }
+
             var Workspace = function(){
                 this.SCREEN_WIDTH = 600;
                 this.SCREEN_HEIGHT = 400;
@@ -27,7 +31,7 @@
                 this.init_scene();
                 this.init_lights();
 
-                this.render_debug_helpers();
+                // this.render_debug_helpers();
 
                 this.update_camera();
                 this.render();
@@ -48,7 +52,7 @@
                 this.scene = new THREE.Scene();
                 this.scene.fog = new THREE.FogExp2(0x000000, 0.000275);
 
-                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                // this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
             };
 
             Workspace.prototype.init_lights = function(){
@@ -82,8 +86,9 @@
             Workspace.prototype.spin_camera = function(){
                 this._spin_camera_theta = this._spin_camera_theta || 0;
 
-                this.camera.position.x = -1000 * Math.sin(this._spin_camera_theta * Math.PI / 360);
-                this.camera.position.z = -1000 * Math.cos(this._spin_camera_theta * Math.PI / 360);
+                this.camera.position.x = -1500 * Math.sin(this._spin_camera_theta * Math.PI / 360);
+                this.camera.position.z = -1500 * Math.cos(this._spin_camera_theta * Math.PI / 360);
+                this.camera.position.y = 700;
                 this.camera.lookAt(this.scene.position);
                 this._spin_camera_theta += 0.25;
             };
@@ -91,10 +96,7 @@
             Workspace.prototype.render = function(){
                 requestAnimationFrame(function(){ this.render() }.bind(this));
 
-                // this.spin_camera();
-
-                // ball.rotation.y += 0.005;
-                // plane.rotation.y += 0.0005;
+                this.spin_camera();
 
                 this.renderer.render(this.scene, this.camera);
                 if (this.controls) this.controls.update();
@@ -109,7 +111,7 @@
             });
 
             var material = new THREE.MeshLambertMaterial({
-                // side: THREE.FrontSide,
+                // side: THREE.DoubleSide,
                 shading: THREE.FlatShading,
                 color: 0xff0000,
                 // wireframe: true,
@@ -119,32 +121,57 @@
             material.ambient.setRGB( material.color.r * ka, material.color.g * ka, material.color.b * ka );
 
             var terrain = new THREE.Geometry();
+            terrain.dynamic = true;
 
-            terrain.vertices.push(new THREE.Vector3(0, 0, 0));
-            terrain.vertices.push(new THREE.Vector3(0, 0, 100));
-            terrain.vertices.push(new THREE.Vector3(100, 25, 100));
-            terrain.vertices.push(new THREE.Vector3(100, 0, 0));
+            var grid_size = 100;
 
-            terrain.vertices.push(new THREE.Vector3(0, 0, 100));
-            terrain.vertices.push(new THREE.Vector3(0, 0, 200));
-            terrain.vertices.push(new THREE.Vector3(200, 0, 0));
+            var columns = 100;
+            var rows = -1;
 
-            var face;
+            function add_row(){
+                rows += 1;
+                var offset = rows * grid_size;
 
-            face = new THREE.Face3(0,1,2);
-            face.normal = new THREE.Vector3(0,0,-1);
-            terrain.faces.push(face);
+                _.times(columns, function(i){
+                    terrain.vertices.push(new THREE.Vector3(i * grid_size, _.random(0, 75), offset));
+                });
 
-            face = new THREE.Face3(0,2,3);
-            terrain.faces.push(face);
+                if (rows === 0) return;
 
-            face = new THREE.Face3(4,5,2);
-            // face.normal = new THREE.Vector3(0,0,-1);
-            terrain.faces.push(face);
+                _.times(columns, function(i){
+                    if ((i + 1) % columns === 0) return;
 
-            terrain.computeBoundingSphere();
+                    var v1 = (rows - 1) * columns + i;
+                    var v2 = rows * columns + i;
+                    var v3 = (rows - 1) * columns + i + 1;
 
-            workspace.scene.add(new THREE.Mesh(terrain, material));
+                    var face = new THREE.Face3(v1, v2, v3);
+                    terrain.faces.push(face);
+
+                    v1 = v2;
+                    v2 = rows * columns + i + 1;
+
+                    face = new THREE.Face3(v1, v2, v3);
+                    terrain.faces.push(face);
+                });
+
+                terrain.verticesNeedUpdate = true;
+                terrain.elementsNeedUpdate = true;
+
+                terrain.computeFaceNormals();
+                // terrain.mergeVertices();
+            }
+
+            add_row();
+
+            _.times(100, function(){
+                add_row();
+            });
+
+            var ground = new THREE.Mesh(terrain, material);
+            ground.position.set(-1 * columns / 2 * grid_size, 10, -1 * rows / 2 * grid_size);
+
+            workspace.scene.add(ground);
         </script>
     </body>
 </html>
