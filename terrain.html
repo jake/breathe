@@ -41,7 +41,9 @@
                 this.init_scene();
                 this.init_lights();
 
-                // this.render_debug_helpers();
+                if (location.hostname == "localhost") {
+                    this.render_debug_helpers();
+                }
 
                 this.update_camera();
                 this.render();
