@@ -34,6 +34,7 @@
 
                 this.lights = {
                     directional: [],
+                    hemisphere: [],
                 };
 
                 this.init_renderer();
@@ -66,12 +67,16 @@
             };
 
             Workspace.prototype.init_lights = function(){
-                this.scene.add(new THREE.AmbientLight(0xffffff));
+                this.scene.add(new THREE.AmbientLight(0xFFFFFF));
 
                 var directional = new THREE.DirectionalLight(0xFF8D67, 0.75);
                 directional.position.set(-200, 400, -200);
                 this.scene.add(directional);
                 this.lights.directional.push(directional);
+
+                var hemisphere = new THREE.HemisphereLight(0xFF8D67, 0x000000, 0.25);
+                this.scene.add(hemisphere);
+                this.lights.hemisphere.push(hemisphere);
             };
 
             Workspace.prototype.init_stats = function(){
@@ -103,6 +108,10 @@
                 _.each(this.lights.directional, function(light){
                     this.scene.add(new THREE.DirectionalLightHelper(light, 100));
                 }, this);
+
+                _.each(this.lights.hemisphere, function(light){
+                    this.scene.add(new THREE.HemisphereLightHelper(light, 750));
+                }, this);
             };
 
             Workspace.prototype.spin_camera = function(){
@@ -129,7 +138,7 @@
 
                 // if (terrain) {
                 //     _.each(terrain.vertices, function(x){
-                //         x.y += Math.random() * _.random(-1,1);
+                //         x.z += Math.random() * _.random(-1,1);
                 //     });
 
                 //     terrain.verticesNeedUpdate = true;
@@ -161,52 +170,20 @@
             var ka = 0.4;
             material.ambient.setRGB( material.color.r * ka, material.color.g * ka, material.color.b * ka );
 
-            var terrain = new THREE.Geometry();
+            var size = 75;
+
+            var terrain = new THREE.PlaneGeometry(size * 100, size * 100, size, size);
             terrain.dynamic = true;
 
-            var grid_size = 100;
-
-            var columns = 100;
-            var rows = -1;
-
-            function add_row(){
-                rows += 1;
-                var offset = rows * grid_size;
-
-                _.times(columns, function(i){
-                    terrain.vertices.push(new THREE.Vector3(i * grid_size, _.random(0, 75), offset));
-                });
-
-                if (rows === 0) return;
-
-                _.times(columns, function(i){
-                    if ((i + 1) % columns === 0) return;
-
-                    var v1 = (rows - 1) * columns + i;
-                    var v2 = rows * columns + i;
-                    var v3 = (rows - 1) * columns + i + 1;
-
-                    var face = new THREE.Face3(v1, v2, v3);
-                    terrain.faces.push(face);
-
-                    v1 = v2;
-                    v2 = rows * columns + i + 1;
-
-                    face = new THREE.Face3(v1, v2, v3);
-                    terrain.faces.push(face);
-                });
-
-                terrain.computeFaceNormals();
-                // terrain.mergeVertices();
-            }
-
-            _.times(columns, function(){
-                add_row();
+            _.each(terrain.vertices, function(x){
+                x.z += Math.random() * _.random(0,75);
             });
 
+            terrain.computeFaceNormals();
+
             var ground = new THREE.Mesh(terrain, material);
-            ground.position.set(-1 * columns / 2 * grid_size, 10, -1 * rows / 2 * grid_size);
-            // ground.position.x = ((columns - 1) / 2) * grid_size * -1;
+            ground.position.y = 10;
+            ground.rotation.x = -90 * Math.PI/180;
 
             workspace.scene.add(ground);
         </script>
