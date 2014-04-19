@@ -42,8 +42,12 @@
                 this.init_scene();
                 this.init_lights();
 
-                if (location.search === "?debug") {
+                if (location.search.indexOf("debug") !== -1) {
                     this.render_debug_helpers();
+                }
+
+                if (location.search.indexOf("stats") !== -1) {
+                    this.init_stats();
                 }
 
                 this.update_camera();
@@ -80,6 +84,8 @@
             };
 
             Workspace.prototype.init_stats = function(){
+                if (this.stats !== false) return;
+
                 this.stats = new Stats();
                 this.stats.domElement.style.position = 'absolute';
                 this.stats.domElement.style.bottom = '0px';
