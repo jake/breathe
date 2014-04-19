@@ -127,6 +127,15 @@
                     this.spin_camera();
                 }
 
+                // if (terrain) {
+                //     _.each(terrain.vertices, function(x){
+                //         x.y += Math.random() * _.random(-1,1);
+                //     });
+
+                //     terrain.verticesNeedUpdate = true;
+                //     terrain.computeFaceNormals();
+                // }
+
                 this.renderer.render(this.scene, this.camera);
             };
 
@@ -187,21 +196,17 @@
                     terrain.faces.push(face);
                 });
 
-                terrain.verticesNeedUpdate = true;
-                terrain.elementsNeedUpdate = true;
-
                 terrain.computeFaceNormals();
                 // terrain.mergeVertices();
             }
 
-            add_row();
-
-            _.times(100, function(){
+            _.times(columns, function(){
                 add_row();
             });
 
             var ground = new THREE.Mesh(terrain, material);
             ground.position.set(-1 * columns / 2 * grid_size, 10, -1 * rows / 2 * grid_size);
+            // ground.position.x = ((columns - 1) / 2) * grid_size * -1;
 
             workspace.scene.add(ground);
         </script>
