@@ -32,6 +32,8 @@
 
                 this.stats = false;
 
+                this.speed = 0.25;
+
                 this.lights = {
                     directional: [],
                     hemisphere: [],
@@ -48,6 +50,10 @@
 
                 if (location.search.indexOf("stats") !== -1) {
                     this.init_stats();
+                }
+
+                if (location.search.indexOf("slow") !== -1) {
+                    this.speed = 0.025;
                 }
 
                 this.update_camera();
@@ -127,7 +133,7 @@
                 this.camera.position.z = -1500 * Math.cos(this._spin_camera_theta * Math.PI / 360);
                 this.camera.position.y = 700;
                 this.camera.lookAt(this.scene.position);
-                this._spin_camera_theta += 0.25;
+                this._spin_camera_theta += this.speed;
             };
 
             Workspace.prototype.render = function(){
