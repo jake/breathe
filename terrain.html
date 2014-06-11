@@ -34,6 +34,8 @@
 
                 this.speed = 0.25;
 
+                this.wireframe = false;
+
                 this.lights = {
                     directional: [],
                     hemisphere: [],
@@ -54,6 +56,10 @@
 
                 if (location.search.indexOf("slow") !== -1) {
                     this.speed = 0.025;
+                }
+
+                if (location.search.indexOf("wireframe") !== -1) {
+                    this.wireframe = true;;
                 }
 
                 this.update_camera();
@@ -172,7 +178,7 @@
                 // side: THREE.DoubleSide,
                 shading: THREE.FlatShading,
                 color: 0x3b2f4a,
-                // wireframe: true,
+                wireframe: workspace.wireframe,
             });
 
             if (! Detector.webgl) {
