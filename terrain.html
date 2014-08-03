@@ -33,6 +33,7 @@
                 this.stats = false;
 
                 this.speed = 0.25;
+                this.brightness = 0.75;
 
                 this.wireframe = false;
                 this.fog = true;
@@ -44,6 +45,10 @@
 
                 if (location.search.indexOf("nofog") !== -1) {
                     this.fog = false;
+                }
+
+                if (location.search.indexOf("bright") !== -1) {
+                    this.brightness = 1.0;
                 }
 
                 this.init_renderer();
@@ -90,12 +95,12 @@
             Workspace.prototype.init_lights = function(){
                 this.scene.add(new THREE.AmbientLight(0xFFFFFF));
 
-                var directional = new THREE.DirectionalLight(0xFF8D67, 0.85);
+                var directional = new THREE.DirectionalLight(0xFF8D67, this.brightness * 1.2);
                 directional.position.set(-200, 400, -200);
                 this.scene.add(directional);
                 this.lights.directional.push(directional);
 
-                var hemisphere = new THREE.HemisphereLight(0xFF8D67, 0x000000, 0.75);
+                var hemisphere = new THREE.HemisphereLight(0xFF8D67, 0x000000, this.brightness);
                 this.scene.add(hemisphere);
                 this.lights.hemisphere.push(hemisphere);
             };
